@@ -1,0 +1,208 @@
+#####Autores: Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o 
+##intuito de calcular o CAPM do retorno da taxa de câmbio
+##com a carteira de mercado 
+##sendo representada pelo índice ibovespa
+## e o ativo livre de risco o CDI
+#Os dados são do período entre 1/junho/2015 
+#até 30/junho/2017
+
+
+
+
+####Pacotes necessários
+install.packages("tseries")
+install.packages("lmtest")
+library(lmtest)
+library(tseries)
+
+
+
+
+#######Entrada
+######Dados do CDI, do ibov e da taxa de câmbio
+
+#####Carteira de Mercado (ibov) e Ativo livre de risco (CDI)
+#####CDI
+CDI <- read.csv("C:/Users/userr/Desktop/CDI.csv", sep = ";", col.names = c("Data","cdi"), dec = ".", na.strings = c("Cetip"))
+View(CDI)
+
+###As datas estão ao contrário, logo se usará a função para reverter
+cdi<-rev(CDI$cdi)
+
+#####iBOV
+ibov<-read.csv("C:/Users/userr/Desktop/ibov.csv", col.names = c("Data", "Open","High", "Low", "Close","Vol"))
+View(ibov)
+
+
+#####Dados da taxa de câmbio
+
+#### Câmbio
+cambio <- read.csv2("C:/Users/userr/Desktop/Tx Câmbio.csv", sep = ";")
+View(cambio)
+
+
+
+
+
+
+
+#######Processamento
+
+
+
+
+
+
+
+######Transformações em Retorno
+##### Função para transformar em retorno
+R<-function(x){
+  return(
+    ((x[2:length(x)])-x[1:(length(x)- 1)])
+    /x[1:(length(x)- 1)]
+  )
+}
+par(mfrow=c(1,1))
+
+
+##### CDI e ibov
+#### CDI
+cdi<-ts(na.omit(CDI$cdi))
+x<-cdi
+Rf<-R(x)
+plot.ts(Rf)
+print("Rf = Retorno livre de risco")
+
+#### ibov
+ibov<-ts(na.omit(ibov$Close))
+x<-ibov
+Rm <-R(x)
+plot.ts(Rm)
+print("Rm = Retorno mercado")
+
+
+##### Câmbio
+
+cambio<-ts(na.omit(cambio$Tx.de.Cambio...R..US.))
+x<-cambio
+Rc <-R(x)
+plot.ts(Rc)
+print("Rc = Retorno taxa de câmbio")
+
+
+
+
+
+
+###### Nomes das variáveis x e y do modelo linear do CAPM
+###### lm (y~x)
+MQG<-function(y){
+  summary(lm(y~x))
+}
+
+x<-Rm-Rf
+
+##### Para Pomo4
+y<-Rc-Rf
+
+CAPM<-lm(y~x)
+
+
+######Fórmulas lineares do CAPM de cada uma das ações
+##### POMO4
+CAPM<-MQO(y)
+
+gqtest(CAPM)
+
+######Fórmulas dos resíduos de cada uma das regressões
+
+#####Fórmula para resíduos
+e<-function(x){
+  return(
+    residuals(x)
+  )
+}
+
+
+
+
+
+####### Saída
+
+
+
+
+
+###### Resultados das regressões
+par(mfrow=c(1,1))
+
+##### Câmbio
+CAPM
+####Gráficos
+plot(x,y, col = "blue")
+C1<-as.data.frame(CAPM$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C1[1,1], b=C1[2,1] )
+abline(h = c(mean(y),mean(x)), v = c(mean(y), mean(x)), col = "green")
+
+
+
+
+###### Testes sobre os modelos (estacionaridade de
+######y e x e análise de resíduos)
+####Função para estacionaridade
+Dickey<-function(x){
+  return(
+    adf.test(x)
+  )
+}
+
+
+
+##### Estacionaridade das variáveis
+#### Rm-Rf<-x
+Dickey(x)
+
+
+#### Câmbio
+Dickey(y)
+
+
+
+##### Testes (e gráficos) sobre os resíduos
+
+
+####Estacionaridade dos resíduos teste ADF e Ljung-BOx
+###CAPM1
+e1<-e(CAPM) #Aqui determina-se que e1 são os residuos do modelo CAPM
+Dickey(e1)
+Box.test(e1, type = c("Ljung-Box"))
+
+
+
+
+#### Testes de homocedasticidade e gráficos
+###Homocedasticidade
+# Teste Goldfeld e Quandt 
+gqtest(CAPM)
+
+
+
+
+
+
+###Gráficos
+##Definimos que queremos 4 gráficos
+par(mfrow=c (2,2))
+
+##CAPM
+boxplot(e1)
+hist(e1)
+qqnorm(e1)
+plot(x, e1)
+
+
+
