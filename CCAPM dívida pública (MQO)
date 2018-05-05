@@ -1,0 +1,182 @@
+#####Autores: Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o 
+##intuito de calcular o CCAPM da dívida pública
+## contra o Consumo agregado
+## e o ativo livre de risco o CDI
+#Os dados são do período entre 1°trimestre/2008
+#até 1°trimestre/2017
+
+
+
+
+####Pacotes necessários
+install.packages("tseries")
+install.packages("lmtest")
+library(lmtest)
+library(tseries)
+
+
+
+
+#######Entrada
+
+
+
+
+
+
+######Dados do CDI, do consumo e da dívida
+
+#####Ativo livre de risco (CDI) e Consumo
+#####CDI
+CDI <- read.csv("C:/Users/userr/Desktop/CDItri.csv", sep = ";", col.names = c("Data","cdi"), dec = ",")
+View(CDI)
+
+#####Consumo
+C<-read.csv("C:/Users/userr/Desktop/Ctri.csv", sep = ";")
+View(C)
+
+
+#####Dados da dívida
+
+div <- read.csv2("C:/Users/userr/Desktop/divtri.csv")
+View(div)
+
+
+
+
+
+#######Processamento
+
+
+
+
+
+
+
+######Transformações em Retorno
+##### Função para transformar em retorno
+R<-function(x){
+  return(
+    ((x[2:length(x)])-x[1:(length(x)- 1)])
+    /x[1:(length(x)- 1)]
+  )
+}
+
+par(mfrow=c(1,1))
+
+
+##### CDI e Consumo
+#### CDI
+cdi<-ts(na.omit(CDI$cdi))
+x<-cdi
+Rf<-R(x)
+plot.ts(Rf)
+print("Rf = Retorno livre de risco")
+
+#### Consumo
+c<-ts(na.omit(C$C))
+x<-c
+Rm <-R(x)
+plot.ts(Rm)
+print("Rm = Retorno consumo")
+
+
+##### Dívida
+
+
+div<-ts(na.omit(div$Média))
+x<-div
+R1 <-R(x)
+plot.ts(R1)
+print("R1 = variação percentual da dívida")
+
+
+
+
+
+###### Nomes das variáveis x e y do modelo linear do CCAPM
+###### lm (y~x)
+MQO<-function(y,x){
+  summary(lm(y~x))
+}
+
+x<-Rm-Rf
+
+##### Para dívida
+y1<-R1-Rf
+
+
+
+
+
+
+######Fórmula linear do CCAPM para DÍVIDA
+CCAPM1<-MQO(y1,x)
+
+
+
+
+
+
+######Fórmulas dos resíduos de cada uma das regressões
+#####Fórmula para testar homocedasticidade
+homo<-function(x){
+  return(bptest(x))
+}
+
+#####Fórmula para resíduos
+e<-function(x){return(residuals(x))}
+
+
+
+
+
+
+
+
+####### Saída
+
+
+
+
+
+###### Resultado da regressão
+#####Dívida
+CCAPM1
+####Gráficos
+plot(x,y1, col = "blue")
+C1<-as.data.frame(CCAPM1$coefficients)
+###Aqui plotamos a função estimada
+abline(a=C1[1,1], b=C1[2,1] )
+
+
+
+
+
+
+
+
+
+
+##### Testes sobre os resíduos
+
+
+
+
+
+#### Testes de homocedasticidade e autocorrelação 
+###Homocedasticidade
+##Teste de Breusch-Pagan
+#CCAPM1
+homo(CCAPM1)
+
+
+
+####Testes de autocorrelação serial
+###Breusch_Godfrey 
+
+
+bgtest(CCAPM1, order = 24)
