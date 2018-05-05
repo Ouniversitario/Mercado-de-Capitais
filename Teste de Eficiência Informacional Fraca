@@ -1,0 +1,116 @@
+#####Autores: Gerônimo Padilha, Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o intuito 
+##de testar a eficiência informacional fraca
+##(MArco Polo (pomo4), Itaúsa(itsa4)) 
+#Os dados são do período entre 1/junho/2015 até 30/junho/2017
+
+
+####Pacotes necessários
+install.packages("tseries")
+library(tseries)
+
+
+
+
+#################Entrada
+
+
+
+
+
+
+####Itsa4
+itsa4 <- read.csv("C:/Users/userr/Desktop/itsa4.csv")
+View(itsa4)
+
+####Pomo4
+pomo4 <- read.csv("C:/Users/userr/Desktop/pomo4.csv")
+View(pomo4)
+
+
+
+
+
+
+
+###############Processamento
+
+
+
+
+
+
+
+######Determinação da função de retorno
+R<-function(x){
+  return(((x[2:length(x)])-x[1:(length(x)- 1)])/x[1:(length(x)- 1)])}
+
+#### Retorno de Itsa4
+
+
+x<-itsa4$Close
+R1<-R(x)
+
+#### Retorno de Pomo4
+
+x<-pomo4$Close
+R2<-R(x)
+
+
+#####Testes a serem feitos
+
+####Ljung-Box
+Box<-function(x){
+  Box.test(x, type = c("Ljung-Box"))}
+####Dickey-Fuller
+Dickey<-function(x){
+  return(adf.test(x))}
+####Teste de normalidade
+N<-function(x){
+  jarque.bera.test(x)
+}
+####Regressão AR(1)
+Ar<-function(x){summary(
+  arma(x, order = c(1,0), include.intercept = FALSE)
+  )
+}
+
+
+
+
+
+################Saída
+
+
+
+
+#####Testes sobre Retornos
+#### Retorno Itsa4
+Box(R1)
+Dickey(R1)
+N(R1)
+Ar(R1)
+
+#### Retorno Pomo4
+Box(R2)
+Dickey(R2)
+N(R2)
+Ar(R2)
+
+#####Plot dos Retornos
+par(mfrow = c(2,2))
+
+####Retorno Itsa4
+hist(R1)
+qqnorm(R1)
+boxplot(R1)
+plot.ts(R1)
+
+####Retorno Pomo4
+
+hist(R2)
+qqnorm(R2)
+boxplot(R2)
+plot.ts(R2)
