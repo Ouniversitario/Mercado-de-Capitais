@@ -1,0 +1,370 @@
+#####Autores: Gerônimo Padilha, Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o intuito de calcular o APT 
+##de cinco ações (MArco Polo (pomo4), Gerdau (ggbr4), Alupar (alup11),
+##Magazine Luiza (mglu3), Braskem (brkm5)) 
+##com a carteira de mercado sendo representada pelo índice ibovespa e
+##o ativo livre de risco pelo CDI. A taxa de câmbio e o risco Brasil
+##são as outras variáveis macro que se irá utilizar.
+#Os dados são do período entre 1/junho/2015 até 30/junho/2017
+
+
+####Pacotes necessários
+install.packages("tseries")
+install.packages("lmtest")
+library(tseries)
+library(lmtest)
+
+
+
+
+
+#################Entrada
+
+
+
+
+
+######Dados do CDI, do ibov, das ações e dos 2 fatores
+
+#####Carteira de Mercado (ibov) e Ativo livre de risco (CDI)
+
+
+#####CDI
+CDI <- read.csv("C:/Users/userr/Desktop/CDI.csv", sep = ";", col.names = c("Data","cdi"),
+                dec = ".", na.strings = c("Cetip"))
+
+###As datas estão ao contrário, logo se usará a função para reverter
+CDI$cdi<-rev(CDI$cdi)
+CDI$Data<-rev(CDI$Data)
+View(CDI)
+
+
+#####iBOV
+ibov<-read.csv("C:/Users/userr/Desktop/ibov.csv", 
+               col.names = c("Data", "Open","High", "Low", "Close","Vol"))
+View(ibov)
+
+
+
+
+#####Dados de ações
+
+####POMO4
+pomo4 <- read.csv("C:/Users/userr/Desktop/pomo4.csv")
+View(pomo4)
+
+#### Ggbr4
+ggbr4<-read.csv("C:/Users/userr/Desktop/ggbr4.csv")
+View(ggbr4)
+
+#### Alup11
+alup11<-read.csv("C:/Users/userr/Desktop/alup11.csv")
+View(alup11)
+
+#### Mglu3
+mglu3<-read.csv("C:/Users/userr/Desktop/mglu3.csv")
+View(mglu3)
+
+#### Brkm5
+brkm5<-read.csv("C:/Users/userr/Desktop/brkm5.csv")
+View(brkm5)
+
+
+
+
+#####Dados dos fatores
+
+####Câmbio
+Cambio <- read.csv("C:/Users/userr/Desktop/Tx de Cambio.csv", sep = ';')
+View(Cambio)
+
+###As datas estão ao contrário, logo se usará a função para reverter
+cambio<-rev(Cambio$Tx.de.Cambio...R..US.)
+
+
+####Risco Brasil
+Risco_Brasil <- read.csv("C:/Users/userr/Desktop/Risco Brasil.csv", sep = ';')
+View(Risco_Brasil)
+
+###As datas estão ao contrário, logo se usará a função para reverter
+RB<-rev(Risco_Brasil$EMBI...Risco.Brasil)
+
+
+
+
+
+
+
+#######Processamento
+
+
+
+
+
+
+
+######Transformações em Retorno
+##### Função para transformar em retorno
+R<-function(x){
+  return(
+    ((x[2:length(x)])-x[1:(length(x)- 1)])
+    /x[1:(length(x)- 1)]
+  )
+}
+par(mfrow=c(1,1))
+
+
+##### CDI e ibov
+#### CDI
+cdi<-ts(na.omit(CDI$cdi))
+x<-cdi
+Rf<-R(x)
+plot.ts(Rf)
+print("Rf = Retorno livre de risco")
+
+#### ibov
+ibov<-ts(na.omit(ibov$Close))
+x<-ibov
+Rm <-R(x)
+plot.ts(Rm)
+print("Rm = Retorno mercado")
+
+
+
+##### Ações
+
+
+####POMO4
+POMO4<-ts(na.omit(pomo4$Close))
+x<-POMO4
+R1 <-R(x)
+plot.ts(R1)
+print("R1 = Retorno Pomo4")
+
+
+#### Gerdau SA
+ggbr4<-ts(na.omit(ggbr4$Close))
+x<-ggbr4
+R2 <- R(x)
+plot.ts(R2)
+print("R2 = Retorno Ggbr4")
+
+#### Alupar 11
+alup11<-ts(na.omit(alup11$Close))
+x<-alup11
+R3 <- R(x)
+plot.ts(R3)
+print("R3 = Retorno Alup11")
+
+####MAgazine Luiza
+mglu3<-ts(na.omit(mglu3$Close))
+x<-mglu3
+R4 <-R(x)
+plot.ts(R4)
+print("R4 = Retorno Mglu3")
+
+#### Braskem
+brkm5<-ts(na.omit(brkm5$Close))
+x<-brkm5
+R5 <- R(x)
+plot.ts(R5)
+print("R5 = Retorno Brkm5")
+
+##### Fatores (Câmbio e Risco Brasil)
+
+####Câmbio
+cambio<-ts(na.omit(Cambio$Tx.de.Cambio...R..US.))
+x<-cambio
+Rc<-R(x)
+plot.ts(Rc)
+print("Rc = Retorno (variação percentual) do Câmbio")
+
+RB<-ts(na.omit(Risco_Brasil$EMBI...Risco.Brasil))
+x<-RB
+Rb<-R(RB)
+plot.ts(Rb)
+print("Rb = Retorno (variação percentual) do Risco Brasil")
+
+
+
+
+###### Nomes das variáveis y, x1,x2 etc do modelo linear do APT
+
+
+
+######  função para regressão linear - entre y e os fatores
+##### Rc<-Câmbio, Rb<-Risco Brasil, PR<-(Rm-Rf) excesso de retorno
+##### da  carteira de mercado em relação ao ativo livre de risco
+MQO<-function(y){
+  summary(
+    lm(y~PR+Rc+Rb)
+  )
+}
+
+
+##### Para Pomo4
+y1<-R1
+
+##### Para Ggbr4
+y2<-R2
+
+##### Para Alup11
+y3<-R3
+
+##### Para Mglu3
+y4<-R4
+
+##### Para Brkm5
+y5<-R5
+
+
+##### Prêmio de risco de mercado
+PR<-Rm-Rf
+
+
+
+
+
+
+
+
+###########Saída
+
+
+
+
+
+
+
+
+
+###### APT1  (Pomo4)
+
+MQO(y1)
+
+###### APT2  (Ggbr4)
+
+MQO(y2)
+
+###### APT3  (Alup11)
+
+MQO(y3)
+
+###### APT4  (Mglu3)
+
+MQO(y4)
+
+
+###### APT5  (Brkm5)
+
+MQO(y5)
+
+
+########Diagnóstico sobre os resíduos
+###Definição de quantos gráficos
+par(mfrow=c(2,2))
+###Função de resíduos
+e<-function(x){
+  return(residuals(x)
+  )
+}
+###Teste de Breusch-Pagan
+bp<-function(x){
+  return(bptest(x)
+  )
+}
+
+#####APT1
+
+bp(MQO(y1))
+e1<-e(MQO(y1))
+plot.ts(e1)
+hist(e1)
+qqnorm(e1)
+boxplot(e1)
+
+#####APT2
+
+bp(MQO(y2))
+e2<-e(MQO(y2))
+plot.ts(e2)
+hist(e2)
+qqnorm(e2)
+boxplot(e2)
+
+
+#####APT3
+
+bp(MQO(y3))
+e3<-e(MQO(y3))
+plot.ts(e3)
+hist(e3)
+qqnorm(e3)
+boxplot(e3)
+
+
+#####APT4
+
+bp(MQO(y4))
+e4<-e(MQO(y4))
+plot.ts(e4)
+hist(e4)
+qqnorm(e4)
+boxplot(e4)
+
+
+#####APT5
+
+bp(MQO(y5))
+e5<-e(MQO(y5))
+plot.ts(e5)
+hist(e5)
+qqnorm(e5)
+boxplot(e5)
+
+
+#####Testes de estacionaridade
+##Função adf test
+
+B<-function(x){
+  adf.test(x)
+}
+B(Risco_Brasil$EMBI...Risco.Brasil)
+plot.ts(Risco_Brasil$EMBI...Risco.Brasil)
+###Para cada uma das variáveis PR,Rc,Rb
+B(PR)
+B(Rc)
+B(Rb)
+### Para cada um dos y's
+B(y1)
+B(y2)
+B(y3)
+B(y4)
+B(y5)
+### Para os resíduos
+B(e1)
+B(e2)
+B(e3)
+B(e4)
+B(e5)
+
+
+
+##### Teste para ver se erro é ruído branco
+BX<-function(x){
+  Box.test(x, type = c("Ljung-Box"))
+}
+BX(e1)
+BX(e2)
+BX(e3)
+BX(e4)
+BX(e5)
+
+###Testes de autocorrelação
+bgtest(MQO(y1), 30)
+bgtest(MQO(y2), 30)
+bgtest(MQO(y3), 30)
+bgtest(MQO(y4), 30)
+bgtest(MQO(y5), 30)
