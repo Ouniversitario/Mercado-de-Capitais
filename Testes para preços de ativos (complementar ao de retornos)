@@ -1,0 +1,133 @@
+#Esses comandos são complementares ao de testes de retornos. Os pacotes utilizados em um são utilizados no outro
+
+
+#Author:Maicon Ribeiro
+#Ano:2017
+
+
+###Pacotes necessários
+##Para Jarque e Bera e Shapiro Wilk
+
+install.packages("normtest")
+library(normtest)
+
+##Para Kolmogorov-Smirnov
+install.packages("stats")
+library(stats)
+#Kolmogorov-Smirnov requisita que haja uma variável de comparação 
+#que tenha a distribuição que queremos testar
+r<-rnorm(2000,0,1)
+
+
+####Primeiro testaremos para a os preços de POMO4
+attach(pomo4)
+names(pomo4)
+###Preço de fechamento
+v1<-pomo4$Close
+v1
+###Preço de abertura
+v2<-pomo4$Open
+v2
+###Preço de máxima
+v3<-pomo4$High
+v3
+###Preço de mínima
+v4<-pomo4$Low
+v4
+###Para retira os possíveis valores omissos das variáveis
+x<-na.omit(v1)
+w<-na.omit(v2)
+y<-na.omit(v3)
+z<-na.omit(v4)
+
+
+##Os testes e seus resultados para Jarque e Bera
+ajbx<-ajb.norm.test(x,2000)
+ajbx
+ajbx$p.value
+if(ajbx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+ajbw<-ajb.norm.test(w,2000)
+ajbw
+ajbw$p.value
+if(ajbw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+ajby<-ajb.norm.test(y,2000)
+ajby
+ajby$p.value
+if(ajby$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+
+ajbz<-ajb.norm.test(z,2000)
+ajbz
+ajbz$p.value
+if(ajbz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal para Low")}
+
+
+##Os testes e seus resultados para Shapiro-Wilke
+
+shx<-kurtosis.norm.test(x,2000)
+shx
+shx$p.value
+if(shx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+shw<-kurtosis.norm.test(w,2000)
+shw
+shw$p.value
+if(shw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+shy<-kurtosis.norm.test(y,2000)
+shy
+shy$p.value
+if(shy$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+
+shz<-kurtosis.norm.test(z,2000)
+shz
+shz$p.value
+if(shz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal para Low")}
+
+
+
+##Os testes e seus resultados para Kolmogorov-Smirnov
+
+kolx<-ks.test(x,r)
+kolx
+kolx$p.value
+if(kolx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+kolw<-ks.test(w,r)
+kolw
+kolw$p.value
+if(kolw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+koly<-ks.test(y,r)
+koly
+koly$p.value
+if(koly$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+kolz<-ks.test(z,r)
+kolz
+kolz$p.value
+if(kolz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal para Low")}
