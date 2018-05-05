@@ -1,0 +1,355 @@
+#######Programa para testar se os preços de Fechamento, Abertura, Máximo e mínimo 
+#######e seus respectivos retornos da pomo4 (Marco Polo) seguem distribuição normal com base nos teste
+####### de Para Jarque e Bera, Shapiro Wilk e Kolmogorov-Smirnov, utilizou um grau de significância de 5% (0,05) para todos os testes.
+
+##### Autores:Lucas Bley, Maicon Ribeiro
+
+####Data:2/Junho/2017
+
+
+
+####Comando para abrir a base de dados
+###Verificar se os dados (pomo4) estão na área especificada abaixo.
+###No caso estão no desktop
+
+library(readr)
+pomo4 <- read_csv(##Acrescente aqui o local onde os dados estão no seu computador e o
+  "C:/Users/userr/Desktop/pomo4.csv", 
+  col_types = cols(`Adj Close` = col_number(), 
+                   Close = col_number(), High = col_number(), 
+                   Low = col_number(), Open = col_number(), 
+                   Volume = col_number()))
+
+
+##Verificar se todas as variáveis usadas estão em formato de número (numeric)
+class(pomo4$Open)
+class(pomo4$Close)
+class(pomo4$High)
+class(pomo4$Low)
+
+###Pacotes necessários
+##Para Jarque e Bera e Shapiro Wilk
+
+install.packages("normtest")
+
+##Para Kolmogorov-Smirnov
+install.packages("stats")
+
+
+#Library necessárias (a parte de instalação pode ser pulada caso já estejam instalados
+library(normtest)
+library(stats)
+
+#Kolmogorov-Smirnov requisita que haja uma variável de comparação 
+#que tenha a distribuição que queremos testar
+r<-rnorm(4303,0,1)
+
+
+
+
+####Caso você já tenha carregado os dados e tenha acionado as libraries, podes começar por aqui
+
+
+####Primeiro testaremos para a os preços de POMO4
+attach(pomo4)
+names(pomo4)
+###Preço de fechamento
+v1<-pomo4$Close
+v1
+###Preço de abertura
+v2<-pomo4$Open
+v2
+###Preço de máxima
+v3<-pomo4$High
+v3
+###Preço de mínima
+v4<-pomo4$Low
+v4
+###Para retira os possíveis valores omissos das variáveis
+x<-na.omit(v1)
+w<-na.omit(v2)
+y<-na.omit(v3)
+z<-na.omit(v4)
+
+
+##Os testes e seus resultados para Jarque e Bera
+#Close
+ajbx<-ajb.norm.test(x,4303)
+ajbx
+ajbx$p.value
+if(ajbx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+#Open
+ajbw<-ajb.norm.test(w,4303)
+ajbw
+ajbw$p.value
+if(ajbw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+#High
+ajby<-ajb.norm.test(y,4303)
+ajby
+ajby$p.value
+if(ajby$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+
+#Low
+ajbz<-ajb.norm.test(z,4303)
+ajbz
+ajbz$p.value
+if(ajbz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal para Low")}
+
+
+##Os testes e seus resultados para Shapiro-Wilke
+#Close
+shx<-kurtosis.norm.test(x,4303)
+shx
+shx$p.value
+if(shx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+#Open
+shw<-kurtosis.norm.test(w,4303)
+shw
+shw$p.value
+if(shw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+#High
+shy<-kurtosis.norm.test(y,4303)
+shy
+shy$p.value
+if(shy$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+
+#Low
+shz<-kurtosis.norm.test(z, 4303)
+shz
+shz$p.value
+if(shz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal para Low")}
+
+
+
+##Os testes e seus resultados para Kolmogorov-Smirnov
+#Close
+kolx<-ks.test(x,r)
+kolx
+kolx$p.value
+if(kolx$p.value > 0.05){
+  print("Aceita H0(Normal) para Close")} else{
+    print("Não aceita H0, não segue distribuição normal para Close")}
+
+#Open
+kolw<-ks.test(w,r)
+kolw
+kolw$p.value
+if(kolw$p.value > 0.05){
+  print("Aceita H0(Normal) para Open")} else{
+    print("Não aceita H0, não segue distribuição normal para Open")}
+
+#High
+koly<-ks.test(y,r)
+koly
+koly$p.value
+if(koly$p.value > 0.05){
+  print("Aceita H0(Normal) para High")} else{
+    print("Não aceita H0, não segue distribuição normal para High")}
+
+#Low
+kolz<-ks.test(z,r)
+kolz
+kolz$p.value
+if(kolz$p.value > 0.05){
+  print("Aceita H0(Normal) para Low")} else{
+    print("Não aceita H0, não segue distribuição normal Low")}
+
+
+####Agora testamos para os Retornos de pomo4
+
+###Definindo as variáveis de retorno
+###Rtx= Close, Rtw=Open, Rty=High, Rtz=Low
+
+##Retorno de close = Rtx
+Tx<-length(x)
+Tx
+Ptx <- x[2:Tx]
+Ptx
+Ptx_1 <- x[1:(Tx - 1)]
+Ptx_1
+Rtx <- (Ptx - Ptx_1)/Ptx_1
+Rtx
+
+##Retorno de Open = Rtw
+
+Tw<-length(w)
+Tw
+Ptw <- w[2:Tw]
+Ptw
+Ptw_1 <- x[1:(Tw - 1)]
+Ptw_1
+Rtw <- (Ptw - Ptw_1)/Ptw_1
+Rtw
+
+##Retorno de High = Rty
+
+Ty<-length(y)
+Ty
+Pty <- y[2:Ty]
+Pty
+Pty_1 <- y[1:(Ty - 1)]
+Pty_1
+Rty <- (Pty - Pty_1)/Pty_1
+Rty
+
+
+##Retorno de Low = Rtz
+Tz<-length(z)
+Tz
+Ptz <- y[2:Tz]
+Ptz
+Ptz_1 <- y[1:(Tz - 1)]
+Ptz_1
+Rtz <- (Ptz - Ptz_1)/Ptz_1
+Rtz
+
+###Procederemos os testes de normalidade
+##Jarque e Bera
+length(Rtx)
+
+##Os testes e seus resultados para Jarque e Bera
+#RTX
+ajbRtx<-ajb.norm.test(Rtx,4302)
+ajbRtx
+ajbRtx$p.value
+if(ajbRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+ajbRtw<-ajb.norm.test(Rtw,4302)
+ajbRtw
+ajbRtw$p.value
+if(ajbRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+
+#Rty
+ajbRty<-ajb.norm.test(Rty,4302)
+ajbRty
+ajbRty$p.value
+if(ajbRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+
+#Rtz
+ajbRtz<-ajb.norm.test(Rtz,4302)
+ajbRtz
+ajbRtz$p.value
+if(ajbRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
+##Shapiro-Wilke
+
+##Os testes e seus resultados para Shapiro-Wilke
+#Rtx
+shRtx<-kurtosis.norm.test(Rtx,4302)
+shRtx
+shRtx$p.value
+if(shRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+shRtw<-kurtosis.norm.test(Rtw,4302)
+shRtw
+shRtw$p.value
+if(shRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+#Rty
+
+shRty<-kurtosis.norm.test(Rty,4302)
+shRty
+shRty$p.value
+if(shRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+
+#Rtz
+shRtz<-kurtosis.norm.test(z,4302)
+shRtz
+shRtz$p.value
+if(shRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
+##Kolmogorov-Smirnov
+##Definição de nova variável de comparação
+j<-rnorm(4302,0,1)
+hist(j)
+
+##Os testes e seus resultados para Kolmogorov-Smirnov
+#Rtx
+kolRtx<-ks.test(Rtx,j)
+kolRtx
+kolRtx$p.value
+if(kolRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+kolRtw<-ks.test(Rtw,j)
+kolRtw
+kolRtw$p.value
+if(kolRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+#Rty
+
+kolRty<-ks.test(Rty,j)
+kolRty
+kolRty$p.value
+if(kolRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+#Rtz
+kolRtz<-ks.test(Rtz,j)
+kolRtz
+kolRtz$p.value
+if(kolRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
+###Apresentação dos histogramas e boxplots
+##Histogramas
+#De Close
+hist(x)
+#De Open
+hist(w)
+#De High
+hist(y)
+#De Low
+hist(z)
+
+
+##Boxplots
+#De Rtx
+boxplot(Rtx)
+#De Rtw
+boxplot(Rtw)
+#De Rty
+boxplot(Rty)
+#De Rtz
+boxplot(Rtz)
