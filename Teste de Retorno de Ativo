@@ -1,0 +1,162 @@
+#Os comandos a seguir devem ser utilizados no Software R
+#Autor:Maicon Ribeiro
+#Ano:2017
+
+#Nesse código testá-se se o retorno de um determinado ativo apresenta distribuição normal
+
+####Agora testamos para os Retornos de pomo4
+
+###Definindo as variáveis de retorno
+###Rtx= Close, Rtw=Open, Rty=High, Rtz=Low
+
+##Retorno de close
+Tx<-length(x)
+Tx
+Ptx <- x[2:Tx]
+Ptx
+Ptx_1 <- x[1:(Tx - 1)]
+Ptx_1
+Rtx <- (Ptx - Ptx_1)/Ptx_1
+Rtx
+ 
+##Retorno de Open
+ 
+Tw<-length(w)
+Tw
+Ptw <- w[2:Tw]
+Ptw
+Ptw_1 <- x[1:(Tw - 1)]
+Ptw_1
+Rtw <- (Ptw - Ptw_1)/Ptw_1
+Rtw
+ 
+##Retorno de High
+ 
+Ty<-length(y)
+Ty
+Pty <- y[2:Ty]
+Pty
+Pty_1 <- y[1:(Ty - 1)]
+Pty_1
+Rty <- (Pty - Pty_1)/Pty_1
+Rty
+
+
+##Retorno de Low
+Tz<-length(z)
+Tz
+Ptz <- y[2:Tz]
+Ptz
+Ptz_1 <- y[1:(Tz - 1)]
+Ptz_1
+Rtz <- (Ptz - Ptz_1)/Ptz_1
+Rtz
+
+###Procederemos os testes de normalidade
+##Jarque e Bera
+
+##Os testes e seus resultados para Jarque e Bera
+#RTX
+ajbRtx<-ajb.norm.test(Rtx,2000)
+ajbRtx
+ajbRtx$p.value
+if(ajbRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+ajbRtw<-ajb.norm.test(Rtw,2000)
+ajbRtw
+ajbRtw$p.value
+if(ajbRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+
+#Rty
+ajbRty<-ajb.norm.test(Rty,2000)
+ajbRty
+ajbRty$p.value
+if(ajbRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+
+#Rtz
+ajbRtz<-ajb.norm.test(Rtz,2000)
+ajbRtz
+ajbRtz$p.value
+if(ajbRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
+##Shapiro-Wilke
+
+##Os testes e seus resultados para Shapiro-Wilke
+#Rtx
+shRtx<-kurtosis.norm.test(Rtx,2000)
+shRtx
+shRtx$p.value
+if(shRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+shRtw<-kurtosis.norm.test(Rtw,2000)
+shRtw
+shRtw$p.value
+if(shRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+#Rty
+
+shRty<-kurtosis.norm.test(Rty,2000)
+shRty
+shRty$p.value
+if(shRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+
+#Rtz
+shRtz<-kurtosis.norm.test(z,2000)
+shRtz
+shRtz$p.value
+if(shRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
+##Kolmogorov-Smirnov
+##Definição de nova variável de comparação
+j<-rnorm(4302,0,1)
+hist(j)
+
+##Os testes e seus resultados para Kolmogorov-Smirnov
+#Rtx
+kolRtx<-ks.test(Rtx,j)
+kolRtx
+kolRtx$p.value
+if(kolRtx$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtx")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtx")}
+#Rtw
+kolRtw<-ks.test(Rtw,j)
+kolRtw
+kolRtw$p.value
+if(kolRtw$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtw")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtw")}
+#Rty
+
+kolRty<-ks.test(Rty,j)
+kolRty
+kolRty$p.value
+if(kolRty$p.value > 0.05){
+  print("Aceita H0(Normal) para Rty")} else{
+    print("Não aceita H0, não segue distribuição normal para Rty")}
+#Rtz
+kolRtz<-ks.test(Rtz,j)
+kolRtz
+kolRtz$p.value
+if(kolRtz$p.value > 0.05){
+  print("Aceita H0(Normal) para Rtz")} else{
+    print("Não aceita H0, não segue distribuição normal para Rtz")}
+
+
