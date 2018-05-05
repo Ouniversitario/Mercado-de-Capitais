@@ -1,0 +1,142 @@
+###### Aplicativo: Modelagem VaR
+
+###### Descrição: Ler cinco ações (em formato csv) com dados de 5 ações;
+##Montar uma carteira com as ações lidas com pesos determinados 
+#(duas devem ter 52% e as demais 48%);
+##Calcular a volatilidade de cada uma das ações, da carteira e do VaR a 5%;
+##Plotar o gráfico do retorno, do preço e da volatilidade de cada uma 
+#das ações;
+##Apresentar o VaR e a volatilidade calculada.
+
+###### Autor: Maicon Ribeiro
+###### Data: 01/12/2017
+###### Versão: 0.0.4
+
+###############################Instalação de pacotes
+#
+install.packages("PerformanceAnalytics")
+install.packages("fPortfolio")
+install.packages("quantmod")
+
+#
+library(PerformanceAnalytics)
+library(fPortfolio)
+library(quantmod)
+
+# Importação de módulos
+
+
+
+# Definição de classes
+
+
+
+#################################### Definição de funções
+
+#Aqui se define a função retorno
+R<-function(x){
+  ((x[2:length(x)] - x[1:(length(x)-1)]))/(x[1:(length(x)-1)])
+}
+
+
+# Declaração de variáveis
+
+
+
+##################################### Entrada de dados
+
+BBDC4 <- read.csv("C:/Users/userr/Desktop/VaR/BBDC4.SA.csv")
+ITUB4 <- read.csv("C:/Users/userr/Desktop/VaR/ITUB4.SA.csv")
+ABEV3 <- read.csv("C:/Users/userr/Desktop/VaR/ABEV3.SA.csv")
+AMAR3 <- read.csv("C:/Users/userr/Desktop/VaR/AMAR3.SA.csv")
+CIEL3 <- read.csv("C:/Users/userr/Desktop/VaR/CIEL3.SA.csv")
+
+
+#################################### Processamento de dados
+
+#As ações individuais
+
+x1<-na.omit(ts(BBDC4$Close))
+x2<-na.omit(ts(ITUB4$Close))
+x3<-na.omit(ts(ABEV3$Close))
+x4<-na.omit(ts(AMAR3$Close))
+x5<-na.omit(ts(CIEL3$Close))
+
+#Retornos das ações individuais
+r1<-R(x1)
+r2<-R(x2)
+r3<-R(x3)
+r4<-R(x4)
+r5<-R(x5)
+
+#A carteira sem pesos
+rt<-c(r1,r2,r3,r4,r5)
+Rt<-matrix(rt,ncol=5)
+
+#VaR para ações individuais e carteira
+v1<-VaR(r1, p=0.95)
+v2<-VaR(r2, p=0.95)
+v3<-VaR(r3, p=0.95)
+v4<-VaR(r4, p=0.95)
+v5<-VaR(r5, p=0.95)
+
+
+#A volatilidade das ações representada pelo desvio padrão
+s1<-sd(r1)
+s2<-sd(r2)
+s3<-sd(r3)
+s4<-sd(r4)
+s5<-sd(r5)
+
+
+#O VaR
+
+COVRISK<-covRisk(Rt, weights = c( 0.52/2, 0.52/2 , 0.48/3, 0.48/3, 0.48/3))
+VARRISK<-varRisk(Rt, weights = c( 0.52/2, 0.52/2 , 0.48/3, 0.48/3, 0.48/3), alpha = 0.05)
+CVARRISK<-cvarRisk(Rt, weights = c( 0.52/2, 0.52/2 , 0.48/3, 0.48/3, 0.48/3), alpha = 0.05)
+
+
+
+
+
+################################# Saída de dados
+
+#Plotagem dos preços
+par(mfrow=c(2,3))
+plot.ts(x1)
+plot.ts(x2)
+plot.ts(x3)
+plot.ts(x4)
+plot.ts(x5)
+
+#Plotagem dos retornos das ações 
+
+plot.ts(r1)
+plot.ts(r2)
+plot.ts(r3)
+plot.ts(r4)
+plot.ts(r5)
+
+
+#Aqui estarão o VaR das ações individuais
+print("VaR das ações individuais")
+v1
+v2
+v3
+v4
+v5
+
+#Aqui se apresenta o desvio padrão (volaTilidade) 
+print("Desvio padrão")
+s1
+s2
+s3
+s4
+s5
+
+
+#Dados do VaR
+print("Dados do VaR")
+COVRISK
+VARRISK
+CVARRISK
