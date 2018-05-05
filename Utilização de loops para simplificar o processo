@@ -1,0 +1,163 @@
+library(readr)
+library(xlsx)
+library(readxl)
+library(lmtest)
+
+
+ibovespa <- read.csv("IBOVESPA.csv", stringsAsFactors=FALSE, na.strings = "null")
+petr4 <- read.csv("PETR4.csv", stringsAsFactors=FALSE, na.strings = "null")
+vale5 <- read.csv("VALE5.csv", stringsAsFactors=FALSE, na.strings = "null")
+jbss3 <- read.csv("JBSS3.csv", stringsAsFactors=FALSE, na.strings = "null")
+itsa4 <- read.csv("ITSA4.csv", stringsAsFactors=FALSE, na.strings = "null")
+cmig4 <- read.csv("CMIG4.csv", stringsAsFactors=FALSE, na.strings = "null")
+juros <- read_excel("Trabalho CAPM/juros.xls")
+
+#Remove datas com observações faltantes
+
+serie_ibovespa <- ibovespa[complete.cases(ibovespa), ]
+serie_ibovespa$Retorno <- 0
+for (i in 2:length(serie_ibovespa$Close)){
+  serie_ibovespa$Retorno[i] <- log(serie_ibovespa$Close[i] / serie_ibovespa$Close[i-1])
+}
+
+serie_petr4 <- petr4[complete.cases(petr4), ]
+serie_petr4$Retorno <- 0
+for (i in 2:length(serie_petr4$Close)){
+  serie_petr4$Retorno[i] <- log(serie_petr4$Close[i] / serie_petr4$Close[i-1])
+}
+
+serie_vale5 <- vale5[complete.cases(vale5), ]
+serie_vale5$Retorno <- 0
+for (i in 2:length(serie_vale5$Close)){
+  serie_vale5$Retorno[i] <- log(serie_vale5$Close[i] / serie_vale5$Close[i-1])
+}
+
+serie_jbss3 <- jbss3[complete.cases(jbss3), ]
+serie_jbss3$Retorno <- 0
+for (i in 2:length(serie_jbss3$Close)){
+  serie_jbss3$Retorno[i] <- log(serie_jbss3$Close[i] / serie_jbss3$Close[i-1])
+}
+
+serie_itsa4 <- itsa4[complete.cases(itsa4), ]
+serie_itsa4$Retorno <- 0
+for (i in 2:length(serie_itsa4$Close)){
+  serie_itsa4$Retorno[i] <- log(serie_itsa4$Close[i] / serie_itsa4$Close[i-1])
+}
+
+serie_cmig4 <- cmig4[complete.cases(cmig4), ]
+serie_cmig4$Retorno <- 0
+for (i in 2:length(serie_cmig4$Close)){
+  serie_cmig4$Retorno[i] <- log(serie_cmig4$Close[i] / serie_cmig4$Close[i-1])
+}
+
+serie_juros <- juros[complete.cases(juros), ]
+serie_juros$Retorno <- 0
+for (i in 2:length(serie_juros$Média)){
+  serie_juros$Retorno[i] <- log(serie_juros$Média[i] / serie_juros$Média[i-1])
+}
+
+#adiciona coluna de retorno dos juros
+
+for (i in 1:length(serie_petr4$Date)){
+  for (j in i:length(serie_juros$Data)){
+    if (as.Date(serie_petr4$Date[i]) == as.Date(serie_juros$Data[j])){
+      serie_petr4$juros[i] <- serie_juros$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_vale5$Date)){
+  for (j in i:length(serie_juros$Data)){
+    if (as.Date(serie_vale5$Date[i]) == as.Date(serie_juros$Data[j])){
+      serie_vale5$juros[i] <- serie_juros$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_jbss3$Date)){
+  for (j in i:length(serie_juros$Data)){
+    if (as.Date(serie_jbss3$Date[i]) == as.Date(serie_juros$Data[j])){
+      serie_jbss3$juros[i] <- serie_juros$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_itsa4$Date)){
+  for (j in i:length(serie_juros$Data)){
+    if (as.Date(serie_itsa4$Date[i]) == as.Date(serie_juros$Data[j])){
+      serie_itsa4$juros[i] <- serie_juros$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_cmig4$Date)){
+  for (j in i:length(serie_juros$Data)){
+    if (as.Date(serie_cmig4$Date[i]) == as.Date(serie_juros$Data[j])){
+      serie_cmig4$juros[i] <- serie_juros$Retorno[j]
+      break
+    }
+  }
+}
+
+#adiciona coluna de retorno ibovespa
+
+for (i in 1:length(serie_petr4$Date)){
+  for (j in i:length(serie_ibovespa$Date)){
+    if (as.Date(serie_petr4$Date[i]) == as.Date(serie_ibovespa$Date[j])){
+      serie_petr4$ibovespa[i] <- serie_ibovespa$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_vale5$Date)){
+  for (j in i:length(serie_ibovespa$Date)){
+    if (as.Date(serie_vale5$Date[i]) == as.Date(serie_ibovespa$Date[j])){
+      serie_vale5$ibovespa[i] <- serie_ibovespa$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_jbss3$Date)){
+  for (j in i:length(serie_ibovespa$Date)){
+    if (as.Date(serie_jbss3$Date[i]) == as.Date(serie_ibovespa$Date[j])){
+      serie_jbss3$ibovespa[i] <- serie_ibovespa$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_itsa4$Date)){
+  for (j in i:length(serie_ibovespa$Date)){
+    if (as.Date(serie_itsa4$Date[i]) == as.Date(serie_ibovespa$Date[j])){
+      serie_itsa4$ibovespa[i] <- serie_ibovespa$Retorno[j]
+      break
+    }
+  }
+}
+
+for (i in 1:length(serie_cmig4$Date)){
+  for (j in i:length(serie_ibovespa$Date)){
+    if (as.Date(serie_cmig4$Date[i]) == as.Date(serie_ibovespa$Date[j])){
+      serie_cmig4$ibovespa[i] <- serie_ibovespa$Retorno[j]
+      break
+    }
+  }
+}
+
+out1 <- lm((Retorno - juros) ~ (ibovespa - juros), data = serie_petr4)
+out2 <- lm((Retorno - juros) ~ (ibovespa - juros), data = serie_vale5)
+out3 <- lm((Retorno - juros) ~ (ibovespa - juros), data = serie_jbss3)
+out4 <- lm((Retorno - juros) ~ (ibovespa - juros), data = serie_itsa4)
+out5 <- lm((Retorno - juros) ~ (ibovespa - juros), data = serie_cmig4)
+
+bptest(out1)
+bptest(out2)
+bptest(out3)
+bptest(out4)
+bptest(out5)
