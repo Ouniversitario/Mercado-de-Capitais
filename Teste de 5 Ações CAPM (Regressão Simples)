@@ -1,0 +1,369 @@
+#####Autores: Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o 
+##intuito de calcular o CAPM de cinco ações
+##(MArco Polo (pomo4), Gerdau (ggbr4),
+## Alupar (alup11), Magazine Luiza (mglu3), 
+##Itaúsa(itsa4)) com a carteira de mercado 
+##sendo representada pelo índice ibovespa
+## e o ativo livre de risco o CDI
+#Os dados são do período entre 1/junho/2015 
+#até 30/junho/2017
+
+
+
+
+####Pacotes necessários
+install.packages("tseries")
+install.packages("lmtest")
+
+#
+library(lmtest)
+library(tseries)
+
+
+
+
+#######Entrada
+######Dados do CDI, das ações e da Carteira de mercado
+
+#####Carteira de Mercado (ibov) e Ativo livre de risco (CDI)
+#####CDI
+CDI <- read.csv("C:/Users/userr/Desktop/CDI.csv", sep = ";", col.names = c("Data","cdi"), dec = ".", na.strings = c("Cetip"))
+
+###As datas estão ao contrário, logo se usará a função para reverter
+CDI$cdi<-rev(CDI$cdi)
+CDI$Data<-rev(CDI$Data)
+View(CDI)
+
+#####iBOV
+ibov<-read.csv("C:/Users/userr/Desktop/ibov.csv", col.names = c("Data", "Open","High", "Low", "Close","Vol"))
+View(ibov)
+
+
+#####Dados de ações
+
+####POMO4
+pomo4 <- read.csv("C:/Users/userr/Desktop/pomo4.csv")
+View(pomo4)
+
+#### Ggbr4
+ggbr4<-read.csv("C:/Users/userr/Desktop/ggbr4.csv")
+View(ggbr4)
+
+#### Alupar 11
+alup11<-read.csv("C:/Users/userr/Desktop/alup11.csv")
+View(alup11)
+
+#### Mglu3
+mglu3<-read.csv("C:/Users/userr/Desktop/mglu3.csv")
+View(mglu3)
+
+#### Itsa4
+itsa4<-read.csv("C:/Users/userr/Desktop/itsa4.csv")
+View(itsa4)
+
+
+
+
+
+
+#######Processamento
+
+
+
+
+
+
+
+######Transformações em Retorno
+##### Função para transformar em retorno
+R<-function(x){
+  return(
+    ((x[2:length(x)])-x[1:(length(x)- 1)])
+    /x[1:(length(x)- 1)]
+  )
+}
+
+par(mfrow=c(1,1))
+
+
+##### CDI e ibov
+#### CDI
+cdi<-ts(na.omit(CDI$cdi))
+x<-cdi
+Rf<-R(x)
+plot.ts(Rf)
+print("Rf = Retorno livre de risco")
+
+#### ibov
+ibov<-ts(na.omit(ibov$Close))
+x<-ibov
+Rm <-R(x)
+plot.ts(Rm)
+print("Rm = Retorno mercado")
+
+
+##### Ações
+
+
+####POMO4
+POMO4<-ts(na.omit(pomo4$Close))
+x<-POMO4
+R1 <-R(x)
+plot.ts(R1)
+print("R1 = Retorno Pomo4")
+
+
+#### Gerdau SA
+ggbr4<-ts(na.omit(ggbr4$Close))
+x<-ggbr4
+R2 <- R(x)
+plot.ts(R2)
+print("R2 = Retorno Ggbr4")
+
+#### Alup11
+alup11<-ts(na.omit(alup11$Close))
+x<-alup11
+R3 <- R(x)
+plot.ts(R3)
+print("R3 = Retorno Alup11")
+
+####MAgazine Luiza
+mglu3<-ts(na.omit(mglu3$Close))
+x<-mglu3
+R4 <-R(x)
+plot.ts(R4)
+print("R4 = Retorno Mglu3")
+
+####Itausa
+itsa4<-ts(na.omit(itsa4$Close))
+x<-itsa4
+R5 <- R(x)
+plot.ts(R5)
+print("R5 = Retorno Itsa4")
+
+
+###### Nomes das variáveis x e y do modelo linear do CAPM
+###### lm (y~x)
+MQO<-function(y,x){summary(lm(y~x))}
+x<-Rm-Rf
+##### Para Pomo4
+y1<-R1-Rf
+
+##### Para Ggbr4
+y2<-R2-Rf
+
+##### Para Alup11
+y3<-R3-Rf
+
+##### Para Mglu3
+y4<-R4-Rf
+
+##### Para Itsa4
+y5<-R5-Rf
+
+
+
+
+######Fórmulas lineares do CAPM de cada uma das ações
+##### POMO4
+CAPM1<-MQO(y1,x)
+
+#### Ggbr4
+CAPM2<-MQO(y2,x)
+
+##### Alup11
+CAPM3<-MQO(y3,x)
+
+##### Mglu3
+CAPM4<-MQO(y4,x)
+
+##### Itsa4
+CAPM5<-MQO(y5,x)
+
+######Fórmulas dos resíduos de cada uma das regressões
+#####Fórmula para testar homocedasticidade
+homo<-function(x){return(bptest(x))}
+#####Fórmula para resíduos
+e<-function(x){return(residuals(x))}
+
+
+
+
+
+
+
+####### Saída
+
+
+
+
+
+###### Resultados das regressões
+#####Pomo4
+CAPM1
+####Gráficos
+plot(x,y1, col = "blue")
+C1<-as.data.frame(CAPM1$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C1[1,1], b=C1[2,1] )
+
+
+##### Ggbr4
+CAPM2
+####Gráficos
+plot(x,y2, col = "blue")
+C2<-as.data.frame(CAPM2$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C2[1,1], b=C2[2,1] )
+
+##### Alup11
+CAPM3
+####Gráficos
+plot(x,y3, col = "blue")
+C3<-as.data.frame(CAPM3$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C3[1,1], b=C3[2,1] )
+
+
+##### Mglu3
+CAPM4
+####Gráficos
+plot(x,y4, col = "blue")
+C4<-as.data.frame(CAPM4$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C4[1,1], b=C4[2,1] )
+
+##### Itsa4
+CAPM5
+####Gráficos
+plot(x,y5, col = "blue")
+C5<-as.data.frame(CAPM5$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C5[1,1], b=C5[2,1])
+
+
+
+###### Testes sobre os modelos (estacionaridade de y e x e análise de resíduos)
+adf.test(x)
+
+##### Estacionaridade das variáveis
+#### Pomo4
+adf.test(y1)
+
+
+#### Ggbr4
+adf.test(y2)
+
+
+#### Bbdc4
+adf.test(y3)
+
+
+#### Mglu3
+adf.test(y4)
+
+
+#### Itsa4
+adf.test(y5)
+
+
+
+
+##### Testes (e gráficos) sobre os resíduos
+
+
+####Estacionaridade dos resíduos teste ADF e Ljung-BOx
+###CAPM1
+e1<-e(CAPM1) #Aqui determina-se que e1 são os residuos do modelo CAPM1
+adf.test(e1)
+Box.test(e1, type = c("Ljung-Box"))
+
+###CAPM2
+e2<-e(CAPM2) #Aqui determina-se que e2 são os residuos do modelo CAPM2
+adf.test(e2)
+Box.test(e2, type = c("Ljung-Box"))
+
+###CAPM3
+e3<-e(CAPM3) #Aqui determina-se que e3 são os residuos do modelo CAPM3
+adf.test(e3)
+Box.test(e3, type = c("Ljung-Box"))
+
+###CAPM4
+e4<-e(CAPM4) #Aqui determina-se que e4 são os residuos do modelo CAPM4
+adf.test(e4)
+Box.test(e4, type = c("Ljung-Box"))
+
+###CAPM5
+e5<-e(CAPM5) #Aqui determina-se que e5 são os residuos do modelo CAPM5
+adf.test(e5)
+Box.test(e5, type = c("Ljung-Box"))
+
+
+#### Testes de homocedasticidade e gráficos
+###Homocedasticidade
+##CAPM1
+#Teste de Breusch-Pagan
+homo(CAPM1)
+
+
+##CAPM2
+#Teste de Breusch-Pagan
+homo(CAPM2)
+
+
+##CAPM3
+#Teste de Breusch-Pagan
+homo(CAPM3)
+
+
+##CAPM4
+#Teste de Breusch-Pagan
+homo(CAPM4)
+
+
+##CAPM5
+#Teste de Breusch-Pagan
+homo(CAPM5)
+
+
+
+###Gráficos
+##Definimos que queremos 4 gráficos
+par(mfrow=c (2,2))
+
+##CAPM1
+boxplot(e1)
+hist(e1)
+qqnorm(e1)
+plot(x, e1)
+
+
+##CAPM2
+boxplot(e2)
+hist(e2)
+qqnorm(e2)
+plot(x, e2)
+
+##CAPM3
+boxplot(e3)
+hist(e3)
+qqnorm(e3)
+plot(x, e3)
+
+##CAPM4
+boxplot(e4)
+hist(e4)
+qqnorm(e4)
+plot(x, e4)
+
+##CAPM5
+boxplot(e5)
+hist(e5)
+qqnorm(e5)
+plot(x, e5)
+
+
+
