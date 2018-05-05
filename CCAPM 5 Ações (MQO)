@@ -1,0 +1,319 @@
+#####Autores: Gerônimo Padilha, Lucas Hommerding, Maicon Ribeiro
+##### Data:30/Junho/2017
+
+##Definição: O programa abaixo tem o 
+##intuito de calcular o CCAPM de cinco ações
+##(MArco Polo (pomo4), Gerdau (ggbr4),
+## Cemig4 (cmig4), Banco do Brasil (Bbas3), 
+##Petrobrás (petr4)) contra o Consumo agregado
+## e o ativo livre de risco o CDI
+#Os dados são do período entre 1°trimestre/2008
+#até 1°trimestre/2017
+
+
+
+
+####Pacotes necessários
+install.packages("tseries")
+install.packages("lmtest")
+library(lmtest)
+library(tseries)
+
+
+
+
+#######Entrada
+######Dados do CDI, do consumo e das ações
+
+#####Ativo livre de risco (CDI) e Consumo
+#####CDI
+CDI <- read.csv("C:/Users/userr/Desktop/CDItri.csv", sep = ";", col.names = c("Data","cdi"), dec = ",")
+View(CDI)
+
+#####Consumo
+C<-read.csv("C:/Users/userr/Desktop/Ctri.csv", sep = ";")
+View(C)
+
+
+#####Dados de ações
+
+####POMO4
+pomo4 <- read.csv("C:/Users/userr/Desktop/pomo4tri.csv")
+View(pomo4)
+
+#### Ggbr4
+ggbr4<-read.csv("C:/Users/userr/Desktop/ggbr4tri.csv")
+View(ggbr4)
+
+#### Cmig4
+cmig4<-read.csv("C:/Users/userr/Desktop/cmig4tri.csv")
+View(cmig4)
+
+#### Bbas4
+bbas3<-read.csv("C:/Users/userr/Desktop/bbas3tri.csv")
+View(bbas3)
+
+#### Petr4
+petr4<-read.csv("C:/Users/userr/Desktop/petr4tri.csv")
+View(petr4)
+
+
+
+
+
+
+
+#######Processamento
+
+
+
+
+
+
+
+######Transformações em Retorno
+##### Função para transformar em retorno
+R<-function(x){
+  return(
+    ((x[2:length(x)])-x[1:(length(x)- 1)])
+    /x[1:(length(x)- 1)]
+  )
+}
+
+par(mfrow=c(1,1))
+
+
+##### CDI e ibov
+#### CDI
+cdi<-ts(na.omit(CDI$cdi))
+x<-cdi
+Rf<-R(x)
+plot.ts(Rf)
+print("Rf = Retorno livre de risco")
+
+#### Consumo
+c<-ts(na.omit(C$C))
+x<-c
+Rm <-R(x)
+plot.ts(Rm)
+print("Rm = Retorno consumo")
+
+
+##### Ações
+
+
+####POMO4
+POMO4<-ts(na.omit(pomo4$Close))
+x<-POMO4
+R1 <-R(x)
+plot.ts(R1)
+print("R1 = Retorno Pomo4")
+
+
+#### Gerdau SA
+ggbr4<-ts(na.omit(ggbr4$Close))
+x<-ggbr4
+R2 <- R(x)
+plot.ts(R2)
+print("R2 = Retorno Ggbr4")
+
+#### Cemig SA
+cemig4<-ts(na.omit(cmig4$Close))
+x<-cemig4
+R3 <- R(x)
+plot.ts(R3)
+print("R3 = Retorno Cmig4")
+
+#### Banco do Brasil
+bbas3<-ts(na.omit(bbas3$Close))
+x<-bbas3
+R4 <-R(x)
+plot.ts(R4)
+print("R4 = Bbas3")
+
+####Petrobras SA
+petr4<-ts(na.omit(petr4$Close))
+x<-petr4
+R5 <- R(x)
+plot.ts(R5)
+print("R5 = Retorno da Petr4")
+
+
+###### Nomes das variáveis x e y do modelo linear do CAPM
+###### lm (y~x)
+MQO<-function(y,x){
+  summary(lm(y~x))
+}
+
+x<-Rm-Rf
+##### Para Pomo4
+y1<-R1-Rf
+
+##### Para Ggbr4
+y2<-R2-Rf
+
+##### Para Cmig4
+y3<-R3-Rf
+
+##### Para Bbas3
+y4<-R4-Rf
+
+##### Para Petr4
+y5<-R5-Rf
+
+
+
+
+######Fórmulas lineares do CCAPM de cada uma das ações
+##### POMO4
+CCAPM1<-MQO(y1,x)
+
+#### Ggbr4
+CCAPM2<-MQO(y2,x)
+
+##### Bbdc4
+CCAPM3<-MQO(y3,x)
+
+##### Mglu3
+CCAPM4<-MQO(y4,x)
+
+##### Itsa4
+CCAPM5<-MQO(y5,x)
+
+######Fórmulas dos resíduos de cada uma das regressões
+#####Fórmula para testar homocedasticidade
+homo<-function(x){
+  return(bptest(x))
+}
+
+#####Fórmula para resíduos
+e<-function(x){return(residuals(x))}
+
+
+
+
+
+####### Saída
+
+
+
+
+
+###### Resultados das regressões
+#####Pomo4
+CCAPM1
+####Gráficos
+plot(x,y1, col = "blue")
+C1<-as.data.frame(CCAPM1$coefficients)
+###Aqui plotamos a função estimada
+abline(a=C1[1,1], b=C1[2,1] )
+
+
+##### Ggbr4
+CCAPM2
+####Gráficos
+plot(x,y2, col = "blue")
+C2<-as.data.frame(CCAPM2$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C2[1,1], b=C2[2,1] )
+
+
+##### Cmig4
+CCAPM3
+####Gráficos
+plot(x,y3, col = "blue")
+C3<-as.data.frame(CCAPM3$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C3[1,1], b=C3[2,1] )
+
+
+##### Bbas3
+CCAPM4
+####Gráficos
+plot(x,y4, col = "blue")
+C4<-as.data.frame(CCAPM4$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C4[1,1], b=C4[2,1] )
+
+
+##### Petr4
+CCAPM5
+####Gráficos
+plot(x,y5, col = "blue")
+C5<-as.data.frame(CCAPM5$coefficients)
+###Aqui plotamos as médias de y e x e a função estimada
+abline(a=C5[1,1], b=C5[2,1])
+
+
+
+
+
+
+
+
+
+
+
+
+##### Testes (e gráficos) sobre os resíduos
+
+
+####Teste de Ljung-BOx para os resíduos
+###CCAPM1
+e1<-e(CCAPM1) #Aqui determina-se que e1 são os residuos do modelo CCAPM1
+Box.test(e1, type = c("Ljung-Box"))
+
+###CCAPM2
+e2<-e(CCAPM2) #Aqui determina-se que e2 são os residuos do modelo CCAPM2
+Box.test(e2, type = c("Ljung-Box"))
+
+###CCAPM3
+e3<-e(CCAPM3) #Aqui determina-se que e3 são os residuos do modelo CCAPM3
+Box.test(e3, type = c("Ljung-Box"))
+
+###CCAPM4
+e4<-e(CCAPM4) #Aqui determina-se que e4 são os residuos do modelo CCAPM4
+Box.test(e4, type = c("Ljung-Box"))
+
+###CCAPM5
+e5<-e(CCAPM5) #Aqui determina-se que e5 são os residuos do modelo CCAPM5
+Box.test(e5, type = c("Ljung-Box"))
+
+
+#### Testes de homocedasticidade e autocorrelação 
+###Homocedasticidade
+##Teste de Breusch-Pagan
+#CCAPM1
+homo(CCAPM1)
+
+
+
+##CCAPM2
+
+homo(CCAPM2)
+
+
+##CCAPM3
+
+homo(CCAPM3)
+
+
+##CCAPM4
+
+homo(CCAPM4)
+
+
+##CCAPM5
+
+homo(CCAPM5)
+
+
+
+####Testes de autocorrelação serial
+###Breusch_Godfrey 
+bgtest(CCAPM1, order = 24)
+bgtest(CCAPM2, order = 24)
+bgtest(CCAPM3, order = 24)
+bgtest(CCAPM4, order = 24)
+bgtest(CCAPM5, order = 24)
+
